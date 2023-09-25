@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string>
-#include <thread>
+#include "stdafx.h"
 
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")

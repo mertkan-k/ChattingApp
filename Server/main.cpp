@@ -1,12 +1,4 @@
-#include <iostream>
-#include <string>
-#include <thread>
-#include <mutex>
-#include <vector>
-#include <set>
-#include <sstream>
-
-#include "../Common/UIDProvider.hpp"
+#include "stdafx.h"
 
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -19,7 +11,6 @@ int main() {
 
 	std::set<SOCKET> clients;
 	std::mutex clientVectorMutex;
-	CUIDProvider<> idProvider;
 
 	WSADATA wsData;
 	WORD ver = MAKEWORD(2, 2);
@@ -73,19 +64,18 @@ int main() {
 			return 1;
 		}
 
-		auto newId = idProvider.Provide();
 		clients.insert(newSocket);
 
-		std::thread clientThread([&](uint64_t id, SOCKET clientSocket)
+		std::thread clientThread([&](SOCKET clientSocket)
 		{
-			std::cout << "[" << id << "] Client: " << "connected." << std::endl;
+			std::cout << "[" << clientSocket << "] Client: " << "connected." << std::endl;
 
 			char buffer[1024];
 			while (true)
 			{
 				int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 				if (bytesRead <= 0) {
-					std::cout << "[" << id << "] Client: " << "disconnected." << std::endl;
+					std::cout << "[" << clientSocket << "] Client: " << "disconnected." << std::endl;
 					closesocket(clientSocket);
 					{
 						std::scoped_lock lock(clientVectorMutex);
@@ -109,7 +99,7 @@ int main() {
 				}
 			}
 		}
-		, newId, newSocket);
+		, newSocket);
 
 		clientThread.detach();
 	}

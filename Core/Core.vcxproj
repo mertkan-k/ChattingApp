@@ -149,14 +149,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="Core.hpp" />
+    <ClInclude Include="Packet.hpp" />
+    <ClInclude Include="PacketConverter.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TcpClientSocket.hpp" />
     <ClInclude Include="TcpServerSocket.hpp" />
     <ClInclude Include="TcpSocket.hpp" />
+    <ClInclude Include="TS_Map.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="TS_Queue.hpp" />
+    <ClCompile Include="TS_Set.hpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

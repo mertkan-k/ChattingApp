@@ -21,20 +21,9 @@ int main() {
 
 		std::string message;
 		std::getline(std::cin, message);
-		eraseLastLine();  // Erase the last line
 
 		client.SendMsg(message);
 
-		/*char buffer[1024];
-		int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-		if (bytesRead <= 0) {
-			std::cerr << "Server disconnected." << std::endl;
-			closesocket(clientSocket);
-			WSACleanup();
-			return 1;
-		}
-		buffer[bytesRead] = '\0';
-		std::cout << "Server: " << buffer << std::endl;*/
 	}
 
 	std::cout << "client end." << std::endl;

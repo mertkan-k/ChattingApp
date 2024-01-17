@@ -20,7 +20,8 @@ void Client::StartMessageHandlerThread()
 
 void Client::SendMsg(const std::string& msg)
 {
-	m_ServerSocket.get()->Send(msg.c_str(), msg.length());
+	m_ServerSocket.get()->Send();
+	// m_ServerSocket.get()->Send(msg.c_str(), msg.length());
 }
 
 bool Client::OpenConnectionToServer(const std::string& serverIp, const WORD& port)

@@ -2,6 +2,102 @@
 
 #include "TcpServerSocket.hpp"
 
+TcpServerSocket::Client::Client(std::shared_ptr<TcpServerSocket> serverSocket, const SOCKET& socket) :
+	m_ServerSocket(serverSocket),
+	m_socket(socket),
+	m_state(EClientState::INITIALIZED)
+{
+}
+
+TcpServerSocket::Client::~Client()
+{
+	if (m_packetReceiver.joinable()) {
+		m_packetReceiver.join();
+		std::cout << "Packet receiver thread joined in the destructor." << std::endl;
+	}
+
+	if (m_packetSender.joinable()) {
+		m_packetSender.join();
+		std::cout << "Packet sender thread joined in the destructor." << std::endl;
+	}
+}
+
+bool TcpServerSocket::Client::StartPacketReceiving()
+{
+	if (m_packetReceiver.joinable())
+		return false;
+
+	m_packetReceiver = std::thread(&TcpServerSocket::Client::ReceivePacketAsync, this);
+
+	return true;
+}
+
+void TcpServerSocket::Client::ReceivePacketAsync()
+{
+	while (true)
+	{
+		std::unique_ptr<TcpPacket> packet;
+		if (m_socket.Recv(packet))
+		{
+			auto serverSocket = m_ServerSocket.lock();
+			serverSocket.get()->ReceivePacket(std::shared_from_this(), packet);
+		}
+		else
+		{
+			m_socket.Disconnect();
+			break;
+		}
+	}
+}
+
+bool TcpServerSocket::Client::StartPacketSending()
+{
+	if (m_packetSender.joinable())
+		return false;
+
+	m_packetSender = std::thread(&TcpServerSocket::Client::SendPacketAsync, this);
+
+	return true;
+}
+
+void TcpServerSocket::Client::SendPacketAsync()
+{
+	while (true)
+	{
+		if (m_packetsSend.Size() > 0)
+		{
+			std::unique_ptr<Buffer> packet = m_packetsSend.Front();
+			auto serverSocket = m_ServerSocket.lock();
+			serverSocket.get()->Send(*packet.get());
+		}
+	}
+}
+
+bool TcpServerSocket::Client::SendPacket(uint8_t header, const Packet& packet)
+{
+	//auto pack = packet.ToPacket();
+	//m_packetsSend.Push(std::move(pack));
+}
+/////////////////////////////////////////////////////////// End Of TcpServerSocket::Client
+
+/////////////////////////////////////////////////////////// Start Of TcpServerSocket
+bool TcpServerSocket::ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpPacket>>& packet)
+{
+	if (m_packetsReceive.Size())
+	{
+		packet = m_packetsReceive.Front();
+		return true;
+	}
+}
+
+std::shared_ptr<TcpServerSocket::Client> TcpServerSocket::InsertClient(const ConnectionAcceptionResult& acceptionResult)
+{
+	auto newClient = std::make_shared<Client>(new Client(std::make_shared<TcpServerSocket>(this), acceptionResult.socket));
+	m_clients.Insert(newClient);
+
+	return newClient;
+}
+
 bool TcpServerSocket::Listen()
 {
 	assert(m_RealSocket != 0, "already connected!");
@@ -48,8 +144,14 @@ bool TcpServerSocket::Accept(ConnectionAcceptionResult& outResult)
 	return (outResult.socket != INVALID_SOCKET);
 }
 
-TcpServerSocket::TcpServerSocket(const std::string& ip, const WORD& port) :
-	TcpSocket(ip, port),
+void TcpServerSocket::ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<TcpPacket>& packet)
+{
+	m_packetsReceive.Push(std::make_pair(client, std::move(packet)));
+}
+
+TcpServerSocket::TcpServerSocket(const WORD& port) :
+	TcpSocket(),
+	m_port(port),
 	m_isListening(false)
 {
 
@@ -59,5 +161,4 @@ TcpServerSocket::~TcpServerSocket()
 {
 
 }
-
 

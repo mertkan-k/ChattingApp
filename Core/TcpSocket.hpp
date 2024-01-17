@@ -5,7 +5,7 @@
 class TcpBuffer : public Buffer
 {
 public:
-	char* GetRecvPtr()
+	char* GetPtr()
 	{
 		return m_data.get();
 	}
@@ -39,8 +39,8 @@ public:
 	bool Disconnect();
 	virtual bool IsConnected() const;
 
-	size_t Send(TcpBuffer& packet);
 	bool Recv(std::unique_ptr<TcpBuffer>& outPacket);
+	void Send(const std::unique_ptr<TcpBuffer>& packet);
 
 	TcpSocket();
 	TcpSocket(const SOCKET& sock);

@@ -66,7 +66,28 @@ void Server::ProcessPackets()
 				continue;
 			}
 
-			// realClient->
+			EPacketClientToServer header;
+			packetPair.second.get()->Read(header);
+
+			switch (header)
+			{
+			case EPacketClientToServer::PING:
+			{
+				PingPacket packet;
+				packet.Decode(packetPair.second);
+
+				auto curTime = time(0);
+				std::cout << "ping rec diff: " << curTime-packet._time << std::endl;
+
+				PongPacket pongPacket;
+				pongPacket._time = curTime;
+				realClient->SendPacket(pongPacket.Encode());
+				break;
+			}
+
+			default:
+				break;
+			}
 		}
 	}
 }

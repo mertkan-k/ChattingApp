@@ -36,7 +36,7 @@ void TcpServerSocket::Client::ReceivePacketAsync()
 {
 	while (true)
 	{
-		std::unique_ptr<TcpPacket> packet;
+		std::unique_ptr<TcpBuffer> packet;
 		if (m_socket.Recv(packet))
 		{
 			auto serverSocket = m_ServerSocket.lock();
@@ -66,22 +66,21 @@ void TcpServerSocket::Client::SendPacketAsync()
 	{
 		if (m_packetsSend.Size() > 0)
 		{
-			std::unique_ptr<Buffer> packet = m_packetsSend.Front();
+			auto packet = m_packetsSend.Front();
 			auto serverSocket = m_ServerSocket.lock();
-			serverSocket.get()->Send(*packet.get());
+			serverSocket.get()->Send(packet);
 		}
 	}
 }
 
-bool TcpServerSocket::Client::SendPacket(uint8_t header, const Packet& packet)
+bool TcpServerSocket::Client::SendPacket(std::unique_ptr<TcpBuffer>&& packet)
 {
-	//auto pack = packet.ToPacket();
-	//m_packetsSend.Push(std::move(pack));
+	m_packetsSend.Push(std::move(packet));
 }
 /////////////////////////////////////////////////////////// End Of TcpServerSocket::Client
 
 /////////////////////////////////////////////////////////// Start Of TcpServerSocket
-bool TcpServerSocket::ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpPacket>>& packet)
+bool TcpServerSocket::ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>>& packet)
 {
 	if (m_packetsReceive.Size())
 	{
@@ -144,7 +143,7 @@ bool TcpServerSocket::Accept(ConnectionAcceptionResult& outResult)
 	return (outResult.socket != INVALID_SOCKET);
 }
 
-void TcpServerSocket::ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<TcpPacket>& packet)
+void TcpServerSocket::ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<TcpBuffer>& packet)
 {
 	m_packetsReceive.Push(std::make_pair(client, std::move(packet)));
 }

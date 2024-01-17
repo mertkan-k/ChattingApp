@@ -4,7 +4,6 @@
 #include "Packet.hpp"
 #include "TS_Set.hpp"
 #include "TS_Queue.hpp"
-#include "Packet.hpp"
 
 class TcpServerSocket : public TcpSocket
 {
@@ -27,13 +26,13 @@ public:
 		Client(std::shared_ptr<TcpServerSocket>	serverSocket, const SOCKET& socket);
 		~Client();
 
+		bool	SendPacket(std::unique_ptr<TcpBuffer>&& packet);
+
 		bool	StartPacketReceiving();
 		bool	StartPacketSending();
 	protected:
 		void	ReceivePacketAsync();
 		void	SendPacketAsync();
-
-		bool	SendPacket(uint8_t header, const Packet& packet);
 	private:
 		std::weak_ptr<TcpServerSocket>		m_ServerSocket;
 		TcpSocket		m_socket;

@@ -26,9 +26,6 @@ struct Packet
 	virtual bool Decode(std::unique_ptr<TcpBuffer>& buffer) = 0;
 };
 
-//template <typename T, T V>
-//const T Packet<T, V>::m_header = V;
-
 struct PingPacket : Packet<EPacketClientToServer, EPacketClientToServer::PING>
 {
 	time_t m_time;
@@ -41,7 +38,6 @@ struct PingPacket : Packet<EPacketClientToServer, EPacketClientToServer::PING>
 	}
 	bool Decode(std::unique_ptr<TcpBuffer>& buffer) override
 	{
-		//buffer.get()->Read(m_header);
 		buffer.get()->Read(m_time);
 		return true;
 	}
@@ -59,7 +55,6 @@ struct PongPacket : Packet<EPacketServerToClient, EPacketServerToClient::PONG>
 	}
 	bool Decode(std::unique_ptr<TcpBuffer>& buffer) override
 	{
-		//buffer.get()->Read(m_header);
 		buffer.get()->Read(m_time);
 		return true;
 	}

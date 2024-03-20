@@ -2,11 +2,6 @@
 
 #include "Client.hpp"
 
-void Client::SendPacket(std::unique_ptr<TcpBuffer>&& buffer)
-{
-	m_tcpClient.get()->SendPacket(std::move(buffer));
-}
-
 void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<TcpBuffer>& buffer)
 {
 	switch (m_header)
@@ -21,7 +16,7 @@ void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_pt
 
 		PongPacket pongPacket;
 		pongPacket.m_time = curTime;
-		SendPacket(pongPacket.Encode());
+		SendPacket(pongPacket);
 		break;
 	}
 

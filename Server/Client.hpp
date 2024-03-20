@@ -8,7 +8,12 @@ public:
 	Client(std::shared_ptr<TcpServerSocket::Client> tcpClient);
 	~Client();
 
-	void SendPacket(std::unique_ptr<TcpBuffer>&& buffer);
+	template <typename EPacketServerToClient V>
+	void	SendPacket(const Packet<EPacketServerToClient, V>& packet)
+	{
+		m_tcpClient.get()->SendPacket(packet.Encode());
+	}
+
 	void ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<TcpBuffer>& buffer);
 
 public:

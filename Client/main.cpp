@@ -20,7 +20,7 @@ int main() {
 	pack.m_time = time(0);
 
 	std::cout << "time: " << pack.m_time << std::endl;
-	client.SendPacket(pack.Encode());
+	client.SendPacket(pack);
 
 	while (true)
 	{

@@ -41,11 +41,6 @@ size_t Client::ProcessPackets()
 	return packet_count;
 }
 
-void Client::SendPacket(std::unique_ptr<TcpBuffer>&& buffer)
-{
-	m_ServerSocket.get()->SendPacket(std::move(buffer));
-}
-
 void Client::SendMsg(const std::string& msg)
 {
 	std::unique_ptr<TcpBuffer> buffer;

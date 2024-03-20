@@ -13,18 +13,18 @@ public:
 	TcpClientSocket(const std::string& ip, const WORD& port);
 	~TcpClientSocket();
 
-	void	ProcessPackets();
+	bool	ProcessPacket(std::unique_ptr<TcpBuffer>& packet);
+
+	void	ReceivePacket(std::unique_ptr<TcpBuffer>& packet);
+	void	SendPacket(std::unique_ptr<TcpBuffer>&& packet);
 
 private:
 	std::string	m_ip;
 	WORD		m_port;
 	bool		m_isConnected;
 
-	void			ReceivePacket(std::unique_ptr<Packet>& packet);
-	void			SendPacket(std::unique_ptr<Packet>& packet);
-
-	TS_Queue<std::unique_ptr<Packet>>	m_packetsReceive;
-	TS_Queue<std::unique_ptr<Packet>>	m_packetsSend;
+	TS_Queue<std::unique_ptr<TcpBuffer>>	m_packetsReceive;
+	TS_Queue<std::unique_ptr<TcpBuffer>>	m_packetsSend;
 
 	std::thread		m_packetReceiver;
 	std::thread		m_packetSender;

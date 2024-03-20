@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include <WinSock2.h>
 
 class TcpBuffer : public Buffer
 {
@@ -20,6 +21,7 @@ struct PacketKey
 	{
 		return memcmp(this, &other, sizeof(other) != 0);
 	}
+
 };
 struct PacketHead
 {
@@ -28,7 +30,7 @@ struct PacketHead
 	PacketHead(size_t size) : m_size(size)
 	{
 		m_key.m_key1 = size;
-		m_key.m_key1 ^= 12986231241213150462;
+		m_key.m_key1 ^= 12986231241213150462ULL;
 	}
 };
 #pragma pack(pop)

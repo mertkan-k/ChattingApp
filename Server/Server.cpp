@@ -19,7 +19,7 @@ bool Server::StartConnectionListening()
 				if (WaitForNewConnection(newTcpClient))
 				{
 					//server.StartPacketAcceptence(newTcpClient);
-					auto newClient = std::make_shared<Client>(new Client(newTcpClient));
+					auto newClient = std::make_shared<Client>(newTcpClient);
 
 					m_Clients.Insert(newTcpClient, newClient);
 
@@ -34,6 +34,8 @@ bool Server::StartConnectionListening()
 			}
 		}
 	);
+
+	return true;
 }
 
 
@@ -52,44 +54,29 @@ bool Server::WaitForNewConnection(std::shared_ptr<TcpServerSocket::Client>& outC
 	}
 }
 
-void Server::ProcessPackets()
+size_t Server::ProcessPackets()
 {
-	while (true)
+	size_t packetCount = 0;
+
+	std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>> packetPair;
+	while (m_ServerSocket.get()->ProcessPacket(packetPair))
 	{
-		std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>> packetPair;
-		if (m_ServerSocket.get()->ProcessPacket(packetPair))
+		std::shared_ptr<Client> realClient;
+		if (m_Clients.Get(packetPair.first, realClient) == false)
 		{
-			std::shared_ptr<Client> realClient;
-			if (m_Clients.Get(packetPair.first, realClient) == false)
-			{
-				std::cerr << "Invalid client!" << std::endl;
-				continue;
-			}
-
-			EPacketClientToServer header;
-			packetPair.second.get()->Read(header);
-
-			switch (header)
-			{
-			case EPacketClientToServer::PING:
-			{
-				PingPacket packet;
-				packet.Decode(packetPair.second);
-
-				auto curTime = time(0);
-				std::cout << "ping rec diff: " << curTime-packet._time << std::endl;
-
-				PongPacket pongPacket;
-				pongPacket._time = curTime;
-				realClient->SendPacket(pongPacket.Encode());
-				break;
-			}
-
-			default:
-				break;
-			}
+			std::cerr << "Invalid client!" << std::endl;
+			continue;
 		}
+
+		EPacketClientToServer m_header;
+		packetPair.second.get()->Read(m_header);
+
+		realClient.get()->ProcessPacket(m_header, packetPair.second);
+
+		++packetCount;
 	}
+
+	return packetCount;
 }
 
 Server::Server() :
@@ -99,7 +86,7 @@ Server::Server() :
 
 	StartWSA();
 
-	m_ServerSocket = std::make_shared<TcpServerSocket>(new TcpServerSocket(12345));
+	m_ServerSocket = std::make_shared<TcpServerSocket>(8080);
 }
 
 Server::~Server()

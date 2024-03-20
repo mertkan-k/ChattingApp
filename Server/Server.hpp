@@ -3,8 +3,10 @@
 #include "../Core/Core.hpp"
 #include "../Core/TS_Map.hpp"
 
-class TcpServerSocket;
-class TcpServerSocket::Client;
+//class TcpServerSocket;
+//class TcpServerSocket::Client;
+#include "../Core/TcpServerSocket.hpp"
+
 class Client;
 
 class Server : Core
@@ -13,7 +15,7 @@ public:
 	bool	StartConnectionListening();
 	bool	WaitForNewConnection(std::shared_ptr<TcpServerSocket::Client>& outClient);
 
-	void	ProcessPackets();
+	size_t	ProcessPackets();
 
 	Server();
 	~Server();

@@ -12,13 +12,13 @@ TcpServerSocket::Client::Client(std::shared_ptr<TcpServerSocket> serverSocket, c
 TcpServerSocket::Client::~Client()
 {
 	if (m_packetReceiver.joinable()) {
-		m_packetReceiver.join();
 		std::cout << "Packet receiver thread joined in the destructor." << std::endl;
+		m_packetReceiver.join();
 	}
 
 	if (m_packetSender.joinable()) {
-		m_packetSender.join();
 		std::cout << "Packet sender thread joined in the destructor." << std::endl;
+		m_packetSender.join();
 	}
 }
 
@@ -36,11 +36,11 @@ void TcpServerSocket::Client::ReceivePacketAsync()
 {
 	while (true)
 	{
-		std::unique_ptr<TcpBuffer> packet;
+		std::unique_ptr<TcpBuffer> packet = std::make_unique<TcpBuffer>();
 		if (m_socket.Recv(packet))
 		{
 			auto serverSocket = m_ServerSocket.lock();
-			serverSocket.get()->ReceivePacket(std::shared_from_this(), packet);
+			serverSocket.get()->ReceivePacket(shared_from_this(), packet);
 		}
 		else
 		{
@@ -64,9 +64,9 @@ void TcpServerSocket::Client::SendPacketAsync()
 {
 	while (true)
 	{
-		if (m_packetsSend.Size() > 0)
+		std::unique_ptr<TcpBuffer> packet;
+		if (m_packetsSend.Pop(packet))
 		{
-			auto packet = m_packetsSend.Front();
 			auto serverSocket = m_ServerSocket.lock();
 			serverSocket.get()->Send(packet);
 		}
@@ -76,22 +76,23 @@ void TcpServerSocket::Client::SendPacketAsync()
 bool TcpServerSocket::Client::SendPacket(std::unique_ptr<TcpBuffer>&& packet)
 {
 	m_packetsSend.Push(std::move(packet));
+	return true;
 }
 /////////////////////////////////////////////////////////// End Of TcpServerSocket::Client
 
 /////////////////////////////////////////////////////////// Start Of TcpServerSocket
 bool TcpServerSocket::ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>>& packet)
 {
-	if (m_packetsReceive.Size())
+	if (m_packetsReceive.Pop(packet))
 	{
-		packet = m_packetsReceive.Front();
 		return true;
 	}
+	return false;
 }
 
 std::shared_ptr<TcpServerSocket::Client> TcpServerSocket::InsertClient(const ConnectionAcceptionResult& acceptionResult)
 {
-	auto newClient = std::make_shared<Client>(new Client(std::make_shared<TcpServerSocket>(this), acceptionResult.socket));
+	auto newClient = std::make_shared<Client>(shared_from_this(), acceptionResult.socket);
 	m_clients.Insert(newClient);
 
 	return newClient;

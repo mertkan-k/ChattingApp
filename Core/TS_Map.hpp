@@ -1,7 +1,6 @@
 #pragma once
 
-#include <map>
-#include <mutex>
+#include "stdafx.h"
 
 template<typename K, typename V>
 class TS_Map
@@ -15,7 +14,7 @@ public:
 	bool Get(const K& key, V& value)
 	{
 		std::scoped_lock lock(m_mutex);
-		auto it = m_realContainer.find();
+		auto it = m_realContainer.find(key);
 		if (it == m_realContainer.end())
 		{
 			return false;
@@ -29,7 +28,7 @@ public:
 	void Erase(const K& key)
 	{
 		std::scoped_lock lock(m_mutex);
-		m_realContainer.erase(key)
+		m_realContainer.erase(key);
 	}
 
 	TS_Map() {}

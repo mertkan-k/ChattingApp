@@ -15,7 +15,17 @@ int main() {
 
 	std::cout << "Connected to server." << std::endl;
 
-	client.StartMessageHandlerThread();
+
+	PingPacket pack;
+	pack.m_time = time(0);
+	client.SendPacket(pack.Encode());
+
+	while (true)
+	{
+		auto packet_count = client.ProcessPackets();
+		std::cout << "packet_count: " << packet_count << std::endl;
+		Sleep(100);
+	}
 
 	while (true) {
 

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <set>
-#include <mutex>
+#include "stdafx.h"
 
 template<typename T>
 class TS_Set

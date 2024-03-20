@@ -2,21 +2,21 @@
 
 #include "TcpClientSocket.hpp"
 
-void TcpClientSocket::ProcessPackets()
+bool TcpClientSocket::ProcessPacket(std::unique_ptr<TcpBuffer>& packet)
 {
-	while (m_packetsReceive.Size())
+	if (m_packetsReceive.Pop(packet))
 	{
-		std::unique_ptr<Buffer> packet = m_packetsReceive.Front();
-		//
+		return true;
 	}
+	return false;
 }
 
-void TcpClientSocket::ReceivePacket(std::unique_ptr<Buffer>& packet)
+void TcpClientSocket::ReceivePacket(std::unique_ptr<TcpBuffer>& packet)
 {
 	m_packetsReceive.Push(std::move(packet));
 }
 
-void TcpClientSocket::SendPacket(std::unique_ptr<Buffer>& packet)
+void TcpClientSocket::SendPacket(std::unique_ptr<TcpBuffer>&& packet)
 {
 	m_packetsSend.Push(std::move(packet));
 }
@@ -35,7 +35,7 @@ void TcpClientSocket::ReceivePacketAsync()
 {
 	while (true)
 	{
-		std::unique_ptr<Buffer> packet;
+		std::unique_ptr<TcpBuffer> packet = std::make_unique<TcpBuffer>();
 		if (Recv(packet))
 		{
 			ReceivePacket(packet);
@@ -62,11 +62,9 @@ void TcpClientSocket::SendPacketAsync()
 {
 	while (true)
 	{
-		if (m_packetsSend.Size() > 0)
-		{
-			std::unique_ptr<Buffer> packet = m_packetsSend.Front();
-			Send(*packet.get());
-		}
+		std::unique_ptr<TcpBuffer> packet;
+		if (m_packetsSend.Pop(packet))
+			Send(std::move(packet));
 	}
 }
 
@@ -106,7 +104,8 @@ TcpClientSocket::TcpClientSocket(const std::string& ip, const WORD& port) :
 	m_port(port),
 	m_isConnected(false)
 {
-	
+	StartPacketReceiving();
+	StartPacketSending();
 }
 
 TcpClientSocket::~TcpClientSocket()

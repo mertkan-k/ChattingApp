@@ -5,7 +5,7 @@
 #include "TS_Set.hpp"
 #include "TS_Queue.hpp"
 
-class TcpServerSocket : public TcpSocket
+class TcpServerSocket : public TcpSocket, public std::enable_shared_from_this<TcpServerSocket>
 {
 public:
 	struct ConnectionAcceptionResult
@@ -30,16 +30,18 @@ public:
 
 		bool	StartPacketReceiving();
 		bool	StartPacketSending();
+
 	protected:
 		void	ReceivePacketAsync();
 		void	SendPacketAsync();
+
 	private:
 		std::weak_ptr<TcpServerSocket>		m_ServerSocket;
 		TcpSocket		m_socket;
 		EClientState	m_state;
 		std::thread		m_packetReceiver;
 
-		TS_Queue<std::unique_ptr<Buffer>>	m_packetsSend;
+		TS_Queue<std::unique_ptr<TcpBuffer>>	m_packetsSend;
 		std::thread			m_packetSender;
 	};
 
@@ -50,7 +52,6 @@ public:
 	std::shared_ptr<TcpServerSocket::Client> InsertClient(const ConnectionAcceptionResult& acceptionResult);
 
 	void			ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<TcpBuffer>& packet);
-
 	bool			ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>>& packet);
 
 	TcpServerSocket(const WORD& port);

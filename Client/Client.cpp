@@ -3,24 +3,52 @@
 #include "Client.hpp"
 #include "../Core/TcpClientSocket.hpp"
 
-void Client::StartMessageHandlerThread()
+void Client::ProcessPacket(const EPacketServerToClient& m_header, std::unique_ptr<TcpBuffer>& buffer)
 {
-	assert(m_ServerSocket != nullptr);
+	switch (m_header)
+	{
+	case EPacketServerToClient::PONG:
+	{
+		PongPacket packet;
+		packet.Decode(buffer);
 
-	std::thread threadHandleMessagesFromServer([this]() {
-		char buffer[1024];
-		while (true) {
-			auto bytesRead = this->m_ServerSocket.get()->Recv(buffer, sizeof(buffer));
-			buffer[bytesRead] = '\0';
-			std::cout << buffer << std::endl;
-		}
-		});
-	threadHandleMessagesFromServer.detach();
+		auto curTime = time(0);
+		std::cout << "pong rec diff: " << curTime - packet.m_time << std::endl;
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+
+size_t Client::ProcessPackets()
+{
+	size_t packet_count = 0;
+
+	std::unique_ptr<TcpBuffer> buffer;
+	while (m_ServerSocket.get()->ProcessPacket(buffer))
+	{
+		EPacketServerToClient m_header;
+		buffer.get()->Read(m_header);
+
+		ProcessPacket(m_header, buffer);
+
+		++packet_count;
+	}
+
+	return packet_count;
+}
+
+void Client::SendPacket(std::unique_ptr<TcpBuffer>&& buffer)
+{
+	m_ServerSocket.get()->SendPacket(std::move(buffer));
 }
 
 void Client::SendMsg(const std::string& msg)
 {
-	m_ServerSocket.get()->Send();
+	std::unique_ptr<TcpBuffer> buffer;
+	//m_ServerSocket.get()->Send();
 	// m_ServerSocket.get()->Send(msg.c_str(), msg.length());
 }
 

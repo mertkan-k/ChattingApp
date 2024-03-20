@@ -11,7 +11,12 @@ int main() {
 
 	std::cout << "Server is listening.." << std::endl;
 
-	Sleep(10000);
+	while (true)
+	{
+		auto packet_count = server.ProcessPackets();
+		std::cout << "packet_count: " << packet_count << std::endl;
+		Sleep(100);
+	}
 
 	std::cout << "server end." << std::endl;
 	return 0;

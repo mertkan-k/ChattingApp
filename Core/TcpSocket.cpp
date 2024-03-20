@@ -21,9 +21,19 @@ bool TcpSocket::IsConnected() const
 template <typename T>
 bool TcpSocket::Recv(T& value)
 {
-	if (recv(m_RealSocket, reinterpret_cast<char*>(&value), sizeof(value)) != sizeof(value))
+	std::cout << "recv template:: " << typeid(T).name() << " size: " << sizeof(value) << std::endl;
+
+	auto recv_response = recv(m_RealSocket, reinterpret_cast<char*>(&value), sizeof(value), 0);
+
+	if (recv_response == SOCKET_ERROR)
 	{
-		std::cerr << "Invalid recv!: " << typeid(T).name() << std::endl;
+		auto err = WSAGetLastError();
+		std::cerr << "Invalid recv! sock err!: err: " << err << std::endl;
+		return false;
+	}
+	if (recv_response != sizeof(value))
+	{
+		std::cerr << "Invalid recv!: response: " << recv_response << std::endl;
 		return false;
 	}
 	return true;
@@ -31,24 +41,32 @@ bool TcpSocket::Recv(T& value)
 bool TcpSocket::Recv(std::unique_ptr<TcpBuffer>& outPacket)
 {
 	PacketHead head(0);
-	Recv(head);
-
-	PacketKey key;
-	Recv(key);
-
-	if (head.m_key != key)
+	if (Recv(head) == false)
 	{
-		std::cout << "Invalid key!" << std::endl;
+		std::cerr << "Cannot recv head!" << std::endl;
 		return false;
 	}
+
+	PacketHead test_head { head.m_size};
+
+	if (test_head.m_key != head.m_key)
+	{
+		std::cerr << "Invalid key!" << "head: " << head.m_key.m_key1 << "test: " << test_head.m_key.m_key1 << std::endl;
+		return false;
+	}
+	std::cout << "key accepted. size: " << head.m_size << std::endl;
 
 	outPacket.get()->SetSize(head.m_size);
-	int bytesRead = recv(m_RealSocket, outPacket.get()->GetPtr(), outPacket.get()->Size(), 0);
+	auto recv_response = recv(m_RealSocket, outPacket.get()->GetPtr(), outPacket.get()->Size(), 0);
 
-	if (bytesRead <= 0)
+	if (recv_response == SOCKET_ERROR)
 	{
+		auto err = WSAGetLastError();
+		std::cerr << "Invalid recv! sock err!: err: " << err << std::endl;
 		return false;
 	}
+
+	std::cout << "recv done. size: " << outPacket.get()->Size() << std::endl;
 
 	return true;
 }
@@ -56,13 +74,19 @@ bool TcpSocket::Recv(std::unique_ptr<TcpBuffer>& outPacket)
 template <typename T>
 void TcpSocket::Send(const T& value)
 {
-	send(m_RealSocket, reinterpret_cast<const char*>(&value), sizeof(value));
+	std::cout << "send template:: " << typeid(T).name() << " size: " << sizeof(value) << std::endl;
+
+	send(m_RealSocket, reinterpret_cast<const char*>(&value), sizeof(value), 0);
 }
 void TcpSocket::Send(const std::unique_ptr<TcpBuffer>& value)
 {
+	std::cout << "send buffer size:: " << value.get()->Size() << std::endl;
+	
+	std::cout << "send header.." << std::endl;
 	PacketHead head(value.get()->Size());
-
 	Send(head);
+
+	std::cout << "send data.." << value.get()->Size() << std::endl;
 	send(m_RealSocket, value.get()->GetPtr(), value.get()->Size(), 0);
 }
 

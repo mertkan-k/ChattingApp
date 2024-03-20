@@ -2,6 +2,8 @@
 
 #include "../Core/Core.hpp"
 
+#include "../Core/TcpClientSocket.hpp"
+
 class TcpClientSocket;
 
 class Client : Core
@@ -11,7 +13,9 @@ public:
 	bool	CloseConnectinToServer();
 	bool	IsConnectedToServer();
 
-	void	StartMessageHandlerThread();
+	void	SendPacket(std::unique_ptr<TcpBuffer>&& buffer);
+	void	ProcessPacket(const EPacketServerToClient& m_header, std::unique_ptr<TcpBuffer>& buffer);
+	size_t	ProcessPackets();
 	void	SendMsg(const std::string& msg);
 
 	Client();

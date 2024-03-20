@@ -67,8 +67,7 @@ void TcpServerSocket::Client::SendPacketAsync()
 		std::unique_ptr<TcpBuffer> packet;
 		if (m_packetsSend.Pop(packet))
 		{
-			auto serverSocket = m_ServerSocket.lock();
-			serverSocket.get()->Send(packet);
+			m_socket.Send(packet);
 		}
 	}
 }

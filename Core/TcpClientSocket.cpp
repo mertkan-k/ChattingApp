@@ -36,12 +36,15 @@ void TcpClientSocket::ReceivePacketAsync()
 	while (true)
 	{
 		std::unique_ptr<TcpBuffer> packet = std::make_unique<TcpBuffer>();
+		std::cout << "packet waititing.." << std::endl;
 		if (Recv(packet))
 		{
+			std::cout << "packet got!" << std::endl;
 			ReceivePacket(packet);
 		}
 		else
 		{
+			std::cout << "packet dc!" << std::endl;
 			Disconnect();
 			break;
 		}

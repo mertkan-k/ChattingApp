@@ -25,6 +25,7 @@ bool Server::StartConnectionListening()
 
 					newClient.get()->m_tcpClient.get()->StartPacketReceiving();
 					newClient.get()->m_tcpClient.get()->StartPacketSending();
+
 				}
 				else
 				{
@@ -86,7 +87,7 @@ Server::Server() :
 
 	StartWSA();
 
-	m_ServerSocket = std::make_shared<TcpServerSocket>(8080);
+	m_ServerSocket = std::make_shared<TcpServerSocket>(12345);
 }
 
 Server::~Server()

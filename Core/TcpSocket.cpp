@@ -31,6 +31,11 @@ bool TcpSocket::Recv(T& value)
 		std::cerr << "Invalid recv! sock err!: err: " << err << std::endl;
 		return false;
 	}
+	if (recv_response == 0)
+	{
+		std::cerr << "Invalid recv!: disconnect!!" << std::endl;
+		return false;
+	}
 	if (recv_response != sizeof(value))
 	{
 		std::cerr << "Invalid recv!: response: " << recv_response << std::endl;
@@ -47,11 +52,11 @@ bool TcpSocket::Recv(std::unique_ptr<TcpBuffer>& outPacket)
 		return false;
 	}
 
-	PacketHead test_head { head.m_size};
+	PacketHead check_head { head.m_size };
 
-	if (test_head.m_key != head.m_key)
+	if (check_head.m_key != head.m_key)
 	{
-		std::cerr << "Invalid key!" << "head: " << head.m_key.m_key1 << "test: " << test_head.m_key.m_key1 << std::endl;
+		std::cerr << "Invalid key!" << "head: " << head.m_key.m_key1 << "test: " << check_head.m_key.m_key1 << std::endl;
 		return false;
 	}
 	std::cout << "key accepted. size: " << head.m_size << std::endl;
@@ -82,12 +87,14 @@ void TcpSocket::Send(const std::unique_ptr<TcpBuffer>& value)
 {
 	std::cout << "send buffer size:: " << value.get()->Size() << std::endl;
 	
-	std::cout << "send header.." << std::endl;
 	PacketHead head(value.get()->Size());
+	std::cout << "send header.. " << sizeof(head) << std::endl;
 	Send(head);
 
 	std::cout << "send data.." << value.get()->Size() << std::endl;
 	send(m_RealSocket, value.get()->GetPtr(), value.get()->Size(), 0);
+
+	std::cout << "send data.. OK" << std::endl;
 }
 
 TcpSocket::TcpSocket(const SOCKET& sock)

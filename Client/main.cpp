@@ -7,7 +7,7 @@ int main() {
 
 	Client client;
 
-	if (client.OpenConnectionToServer("127.0.0.1", 8080) == false)
+	if (client.OpenConnectionToServer("127.0.0.1", 12345) == false)
 	{
 		std::cerr << "cannot connected to the server" << std::endl;
 		return 1;
@@ -18,12 +18,14 @@ int main() {
 
 	PingPacket pack;
 	pack.m_time = time(0);
+
+	std::cout << "time: " << pack.m_time << std::endl;
 	client.SendPacket(pack.Encode());
 
 	while (true)
 	{
 		auto packet_count = client.ProcessPackets();
-		std::cout << "packet_count: " << packet_count << std::endl;
+		//std::cout << "packet_count: " << packet_count << std::endl;
 		Sleep(100);
 	}
 

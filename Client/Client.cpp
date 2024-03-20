@@ -7,7 +7,7 @@ void Client::ProcessPacket(const EPacketServerToClient& m_header, std::unique_pt
 {
 	switch (m_header)
 	{
-	case EPacketServerToClient::PONG:
+	case PongPacket::m_header:
 	{
 		PongPacket packet;
 		packet.Decode(buffer);
@@ -18,6 +18,7 @@ void Client::ProcessPacket(const EPacketServerToClient& m_header, std::unique_pt
 	}
 
 	default:
+		std::cerr << "unknown packet header: " << m_header << " buffer size: " << buffer.get()->Size() << std::endl;
 		break;
 	}
 }

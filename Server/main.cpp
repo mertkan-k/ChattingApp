@@ -14,7 +14,7 @@ int main() {
 	while (true)
 	{
 		auto packet_count = server.ProcessPackets();
-		std::cout << "packet_count: " << packet_count << std::endl;
+		//std::cout << "packet_count: " << packet_count << std::endl;
 		Sleep(100);
 	}
 

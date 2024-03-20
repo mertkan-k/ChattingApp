@@ -20,7 +20,7 @@ enum EPacketServerToClient : PacketHeader
 template <typename T, T V>
 struct Packet
 {
-	T m_header = V;
+	const static T m_header = V;
 
 	virtual std::unique_ptr<TcpBuffer> Encode() const = 0;
 	virtual bool Decode(std::unique_ptr<TcpBuffer>& buffer) = 0;
@@ -41,7 +41,7 @@ struct PingPacket : Packet<EPacketClientToServer, EPacketClientToServer::PING>
 	}
 	bool Decode(std::unique_ptr<TcpBuffer>& buffer) override
 	{
-		buffer.get()->Read(m_header);
+		//buffer.get()->Read(m_header);
 		buffer.get()->Read(m_time);
 		return true;
 	}
@@ -59,7 +59,7 @@ struct PongPacket : Packet<EPacketServerToClient, EPacketServerToClient::PONG>
 	}
 	bool Decode(std::unique_ptr<TcpBuffer>& buffer) override
 	{
-		buffer.get()->Read(m_header);
+		//buffer.get()->Read(m_header);
 		buffer.get()->Read(m_time);
 		return true;
 	}

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include <memory>
 
 class Buffer
 {
@@ -42,7 +41,7 @@ public:
 
     void Read(char* data, size_t len)
     {
-        if (len > m_size + m_readSeek)
+        if (len > m_size - m_readSeek)
             throw std::out_of_range("Buffer::Read - Not enough data in buffer.");
 
         std::copy(m_data.get() + m_readSeek, m_data.get() + m_readSeek + len, data);

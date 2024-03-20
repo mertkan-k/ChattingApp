@@ -11,13 +11,13 @@ void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_pt
 {
 	switch (m_header)
 	{
-	case EPacketClientToServer::PING:
+	case PingPacket::m_header:
 	{
 		PingPacket packet;
 		packet.Decode(buffer);
 
 		auto curTime = time(0);
-		std::cout << "ping rec diff: " << curTime - packet.m_time << std::endl;
+		std::cout << "ping rec diff: " << packet.m_time << " " << curTime - packet.m_time << std::endl;
 
 		PongPacket pongPacket;
 		pongPacket.m_time = curTime;
@@ -26,6 +26,7 @@ void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_pt
 	}
 
 	default:
+		std::cerr << "unknown packet header: " << m_header << " buffer size: " << buffer.get()->Size() << std::endl;
 		break;
 	}
 }

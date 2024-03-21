@@ -18,7 +18,7 @@ void TcpClientSocket::ReceivePacket(std::unique_ptr<TcpBuffer>& packet)
 
 void TcpClientSocket::SendPacket(std::unique_ptr<TcpBuffer>&& packet)
 {
-	m_packetsSend.Push(std::move(packet));
+	m_packetsSend.PushNotify(std::move(packet));
 }
 
 bool TcpClientSocket::StartPacketReceiving()
@@ -53,6 +53,7 @@ bool TcpClientSocket::StartPacketSending()
 	if (m_packetSender.joinable())
 		return false;
 
+	m_packetSenderExit = false;
 	m_packetSender = std::thread(&TcpClientSocket::SendPacketAsync, this);
 
 	return true;
@@ -60,10 +61,10 @@ bool TcpClientSocket::StartPacketSending()
 
 void TcpClientSocket::SendPacketAsync()
 {
-	while (true)
+	while (m_packetSenderExit == false)
 	{
 		std::unique_ptr<const TcpBuffer> packet;
-		if (m_packetsSend.Pop(packet))
+		if (m_packetsSend.PopWait(packet, m_packetSenderExit))
 			Send(std::move(packet));
 	}
 }
@@ -102,7 +103,8 @@ TcpClientSocket::TcpClientSocket(const std::string& ip, const WORD& port) :
 	TcpSocket(),
 	m_ip(ip),
 	m_port(port),
-	m_isConnected(false)
+	m_isConnected(false),
+	m_packetSenderExit(true)
 {
 	StartPacketReceiving();
 	StartPacketSending();

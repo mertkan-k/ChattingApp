@@ -43,6 +43,7 @@ public:
 
 		TS_Queue<std::unique_ptr<const TcpBuffer>>	m_packetsSend;
 		std::thread			m_packetSender;
+		bool				m_packetSenderExit;
 	};
 
 public:

@@ -5,7 +5,8 @@
 TcpServerSocket::Client::Client(std::shared_ptr<TcpServerSocket> serverSocket, const SOCKET& socket) :
 	m_ServerSocket(serverSocket),
 	m_socket(socket),
-	m_state(EClientState::INITIALIZED)
+	m_state(EClientState::INITIALIZED),
+	m_packetSenderExit(true)
 {
 }
 
@@ -55,6 +56,7 @@ bool TcpServerSocket::Client::StartPacketSending()
 	if (m_packetSender.joinable())
 		return false;
 
+	m_packetSenderExit = false;
 	m_packetSender = std::thread(&TcpServerSocket::Client::SendPacketAsync, this);
 
 	return true;
@@ -62,10 +64,10 @@ bool TcpServerSocket::Client::StartPacketSending()
 
 void TcpServerSocket::Client::SendPacketAsync()
 {
-	while (true)
+	while (m_packetSenderExit == false)
 	{
 		std::unique_ptr<const TcpBuffer> packet;
-		if (m_packetsSend.Pop(packet))
+		if (m_packetsSend.PopWait(packet, m_packetSenderExit))
 		{
 			m_socket.Send(packet);
 		}
@@ -74,7 +76,7 @@ void TcpServerSocket::Client::SendPacketAsync()
 
 bool TcpServerSocket::Client::SendPacket(std::unique_ptr<TcpBuffer>&& packet)
 {
-	m_packetsSend.Push(std::move(packet));
+	m_packetsSend.PushNotify(std::move(packet));
 	return true;
 }
 /////////////////////////////////////////////////////////// End Of TcpServerSocket::Client

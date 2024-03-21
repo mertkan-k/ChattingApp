@@ -29,6 +29,8 @@ private:
 	std::thread		m_packetReceiver;
 	std::thread		m_packetSender;
 
+	bool m_packetSenderExit;
+
 protected:
 	bool	StartPacketReceiving();
 	void	ReceivePacketAsync();

@@ -23,7 +23,7 @@ struct Packet
 	const static T m_header = V;
 
 	virtual std::unique_ptr<TcpBuffer> Encode() const = 0;
-	virtual bool Decode(const std::unique_ptr<TcpBuffer>& buffer) = 0;
+	virtual bool Decode(const std::unique_ptr<const TcpBuffer>& buffer) = 0;
 };
 
 #define ENCODE_BEGIN() \
@@ -53,7 +53,7 @@ struct PingPacket : Packet<EPacketClientToServer, EPacketClientToServer::PING>
 		ENCODE_DATA(m_time);
 		ENCODE_END();
 	}
-	bool Decode(const std::unique_ptr<TcpBuffer>& buffer) override
+	bool Decode(const std::unique_ptr<const TcpBuffer>& buffer) override
 	{
 		DECODE_BEGIN();
 		DECODE_DATA(m_time);
@@ -70,7 +70,7 @@ struct PongPacket : Packet<EPacketServerToClient, EPacketServerToClient::PONG>
 		ENCODE_DATA(m_time);
 		ENCODE_END();
 	}
-	bool Decode(const std::unique_ptr<TcpBuffer>& buffer) override
+	bool Decode(const std::unique_ptr<const TcpBuffer>& buffer) override
 	{
 		DECODE_BEGIN();
 		DECODE_DATA(m_time);

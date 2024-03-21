@@ -2,7 +2,7 @@
 
 #include "TcpClientSocket.hpp"
 
-bool TcpClientSocket::ProcessPacket(std::unique_ptr<TcpBuffer>& packet)
+bool TcpClientSocket::ProcessPacket(std::unique_ptr<const TcpBuffer>& packet)
 {
 	if (m_packetsReceive.Pop(packet))
 	{
@@ -36,15 +36,12 @@ void TcpClientSocket::ReceivePacketAsync()
 	while (true)
 	{
 		std::unique_ptr<TcpBuffer> packet = std::make_unique<TcpBuffer>();
-		std::cout << "packet waititing.." << std::endl;
 		if (Recv(packet))
 		{
-			std::cout << "packet got!" << std::endl;
 			ReceivePacket(packet);
 		}
 		else
 		{
-			std::cout << "packet dc!" << std::endl;
 			Disconnect();
 			break;
 		}
@@ -65,7 +62,7 @@ void TcpClientSocket::SendPacketAsync()
 {
 	while (true)
 	{
-		std::unique_ptr<TcpBuffer> packet;
+		std::unique_ptr<const TcpBuffer> packet;
 		if (m_packetsSend.Pop(packet))
 			Send(std::move(packet));
 	}

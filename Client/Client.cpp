@@ -3,7 +3,7 @@
 #include "Client.hpp"
 #include "../Core/TcpClientSocket.hpp"
 
-void Client::ProcessPacket(const EPacketServerToClient& m_header, std::unique_ptr<TcpBuffer>& buffer)
+void Client::ProcessPacket(const EPacketServerToClient& m_header, const std::unique_ptr<const TcpBuffer>& buffer)
 {
 	switch (m_header)
 	{
@@ -27,7 +27,7 @@ size_t Client::ProcessPackets()
 {
 	size_t packet_count = 0;
 
-	std::unique_ptr<TcpBuffer> buffer;
+	std::unique_ptr<const TcpBuffer> buffer;
 	while (m_ServerSocket.get()->ProcessPacket(buffer))
 	{
 		EPacketServerToClient m_header;

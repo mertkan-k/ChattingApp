@@ -27,7 +27,7 @@ public:
 
     // Read data from the buffer
     template <typename T>
-    void Read(T& value)
+    void Read(T& value) const
     {
         /*if (sizeof(value) > m_size + m_readSeek)
             throw std::out_of_range("Buffer::Read - Not enough data in buffer.");
@@ -39,7 +39,7 @@ public:
     }
 
 
-    void Read(char* data, size_t len)
+    void Read(char* data, size_t len) const
     {
         if (len > m_size - m_readSeek)
             throw std::out_of_range("Buffer::Read - Not enough data in buffer.");
@@ -59,7 +59,7 @@ public:
 
     // Overload >> operator to read data from the buffer
     template <typename T>
-    Buffer& operator>>(T& value)
+    Buffer& operator>>(T& value) const
     {
         Read(value);
         return *this;
@@ -110,5 +110,5 @@ protected:
     std::unique_ptr<char[]> m_data;
     size_t m_size;     // Current size of data in the buffer
     size_t m_capacity; // Capacity of the buffer
-    size_t m_readSeek; // seek of read position
+    mutable size_t m_readSeek; // seek of read position
 };

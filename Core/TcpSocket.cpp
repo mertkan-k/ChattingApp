@@ -77,13 +77,13 @@ bool TcpSocket::Recv(std::unique_ptr<TcpBuffer>& outPacket)
 }
 
 template <typename T>
-void TcpSocket::Send(const T& value)
+void TcpSocket::Send(const T& value) const
 {
 	std::cout << "send template:: " << typeid(T).name() << " size: " << sizeof(value) << std::endl;
 
 	send(m_RealSocket, reinterpret_cast<const char*>(&value), sizeof(value), 0);
 }
-void TcpSocket::Send(const std::unique_ptr<TcpBuffer>& value)
+void TcpSocket::Send(const std::unique_ptr<const TcpBuffer>& value) const
 {
 	std::cout << "send buffer size:: " << value.get()->Size() << std::endl;
 	

@@ -59,7 +59,7 @@ size_t Server::ProcessPackets()
 {
 	size_t packetCount = 0;
 
-	std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>> packetPair;
+	std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<const TcpBuffer>> packetPair;
 	while (m_ServerSocket.get()->ProcessPacket(packetPair))
 	{
 		std::shared_ptr<Client> realClient;

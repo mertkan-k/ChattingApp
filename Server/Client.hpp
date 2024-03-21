@@ -14,7 +14,7 @@ public:
 		m_tcpClient.get()->SendPacket(packet.Encode());
 	}
 
-	void ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<TcpBuffer>& buffer);
+	void ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<const TcpBuffer>& buffer);
 
 public:
 	std::string m_name;

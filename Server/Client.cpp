@@ -2,7 +2,7 @@
 
 #include "Client.hpp"
 
-void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<TcpBuffer>& buffer)
+void Client::ProcessPacket(const EPacketClientToServer& m_header, std::unique_ptr<const TcpBuffer>& buffer)
 {
 	switch (m_header)
 	{

@@ -41,7 +41,7 @@ public:
 		EClientState	m_state;
 		std::thread		m_packetReceiver;
 
-		TS_Queue<std::unique_ptr<TcpBuffer>>	m_packetsSend;
+		TS_Queue<std::unique_ptr<const TcpBuffer>>	m_packetsSend;
 		std::thread			m_packetSender;
 	};
 
@@ -51,8 +51,8 @@ public:
 	bool			Accept(ConnectionAcceptionResult& outResult);
 	std::shared_ptr<TcpServerSocket::Client> InsertClient(const ConnectionAcceptionResult& acceptionResult);
 
-	void			ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<TcpBuffer>& packet);
-	bool			ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<TcpBuffer>>& packet);
+	void			ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<const TcpBuffer>&& packet);
+	bool			ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<const TcpBuffer>>& packet);
 
 	TcpServerSocket(const WORD& port);
 	~TcpServerSocket();
@@ -62,5 +62,5 @@ private:
 	bool		m_isListening;
 
 	TS_Set<std::shared_ptr<Client>>		m_clients;
-	TS_Queue<std::pair<std::shared_ptr<Client>, std::unique_ptr<TcpBuffer>>>	m_packetsReceive;
+	TS_Queue<std::pair<std::shared_ptr<Client>, std::unique_ptr<const TcpBuffer>>>	m_packetsReceive;
 };

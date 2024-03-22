@@ -139,7 +139,7 @@ bool TcpServerSocket::Accept(std::shared_ptr<TcpServerSocket::Client>& outClient
 	if (acceptResult.socket == INVALID_SOCKET)
 		return false;
 
-	InsertClient(acceptResult);
+	outClient = InsertClient(acceptResult);
 
 	return true;
 }

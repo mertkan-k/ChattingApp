@@ -91,14 +91,6 @@ bool TcpServerSocket::ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::C
 	return false;
 }
 
-std::shared_ptr<TcpServerSocket::Client> TcpServerSocket::InsertClient(const ConnectionAcceptionResult& acceptionResult)
-{
-	auto newClient = std::make_shared<Client>(shared_from_this(), acceptionResult.socket);
-	m_clients.Insert(newClient);
-
-	return newClient;
-}
-
 bool TcpServerSocket::Listen()
 {
 	assert(m_RealSocket != 0, "already connected!");
@@ -137,12 +129,27 @@ bool TcpServerSocket::IsConnected() const
 	return m_isListening;
 }
 
-bool TcpServerSocket::Accept(ConnectionAcceptionResult& outResult)
+bool TcpServerSocket::Accept(std::shared_ptr<TcpServerSocket::Client>& outClient)
 {
-	int addrLen = sizeof(outResult.addr);
-	outResult.socket = accept(m_RealSocket, reinterpret_cast<sockaddr*> (&outResult.addr), &addrLen);
+	TcpServerSocket::ConnectionAcceptionResult acceptResult;
 
-	return (outResult.socket != INVALID_SOCKET);
+	int addrLen = sizeof(acceptResult.addr);
+	acceptResult.socket = accept(m_RealSocket, reinterpret_cast<sockaddr*> (&acceptResult.addr), &addrLen);
+
+	if (acceptResult.socket == INVALID_SOCKET)
+		return false;
+
+	InsertClient(acceptResult);
+
+	return true;
+}
+
+std::shared_ptr<TcpServerSocket::Client> TcpServerSocket::InsertClient(const ConnectionAcceptionResult& acceptionResult)
+{
+	auto newClient = std::make_shared<Client>(shared_from_this(), acceptionResult.socket);
+	m_clients.Insert(newClient);
+
+	return newClient;
 }
 
 void TcpServerSocket::ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<const TcpBuffer>&& packet)

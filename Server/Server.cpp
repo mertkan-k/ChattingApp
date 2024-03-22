@@ -42,11 +42,8 @@ bool Server::StartConnectionListening()
 
 bool Server::WaitForNewConnection(std::shared_ptr<TcpServerSocket::Client>& outClient)
 {
-	TcpServerSocket::ConnectionAcceptionResult acceptResult;
-
-	if (m_ServerSocket.get()->Accept(acceptResult))
+	if (m_ServerSocket.get()->Accept(outClient))
 	{
-		outClient = m_ServerSocket.get()->InsertClient(acceptResult);
 		return true;
 	}
 	else

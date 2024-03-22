@@ -8,7 +8,7 @@ class TcpClientSocket : public TcpSocket
 {
 public:
 	bool			Connect();
-	virtual bool	IsConnected() const override;
+	bool	IsConnected() const override;
 
 	TcpClientSocket(const std::string& ip, const WORD& port);
 	~TcpClientSocket();

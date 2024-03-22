@@ -8,11 +8,6 @@
 class TcpServerSocket : public TcpSocket, public std::enable_shared_from_this<TcpServerSocket>
 {
 public:
-	struct ConnectionAcceptionResult
-	{
-		SOCKET		socket	= 0;
-		sockaddr_in	addr	{};
-	};
 	class Client : public std::enable_shared_from_this<Client>
 	{
 		enum class EClientState
@@ -20,6 +15,7 @@ public:
 			INITIALIZED,
 			HANDSHAKE,
 			ACCEPTED,
+			DISCONNECTED,
 		};
 
 	public:
@@ -48,15 +44,22 @@ public:
 
 public:
 	bool			Listen();
-	virtual bool	IsConnected() const override;
-	bool			Accept(ConnectionAcceptionResult& outResult);
-	std::shared_ptr<TcpServerSocket::Client> InsertClient(const ConnectionAcceptionResult& acceptionResult);
+	bool			IsConnected() const override;
+	bool			Accept(std::shared_ptr<TcpServerSocket::Client>& outClient);
 
 	void			ReceivePacket(std::shared_ptr<Client> client, std::unique_ptr<const TcpBuffer>&& packet);
 	bool			ProcessPacket(std::pair<std::shared_ptr<TcpServerSocket::Client>, std::unique_ptr<const TcpBuffer>>& packet);
 
 	TcpServerSocket(const WORD& port);
 	~TcpServerSocket();
+
+private:
+	struct ConnectionAcceptionResult
+	{
+		SOCKET		socket = 0;
+		sockaddr_in	addr {};
+	};
+	std::shared_ptr<TcpServerSocket::Client> InsertClient(const ConnectionAcceptionResult& acceptionResult);
 
 private:
 	WORD		m_port;

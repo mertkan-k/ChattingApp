@@ -102,9 +102,10 @@ TcpSocket::TcpSocket(const SOCKET& sock)
 	m_RealSocket = sock;
 }
 
-TcpSocket::TcpSocket()
+TcpSocket::TcpSocket() :
+	m_RealSocket(socket(AF_INET, SOCK_STREAM, 0))
 {
-	m_RealSocket = socket(AF_INET, SOCK_STREAM, 0);
+	 
 }
 
 TcpSocket::~TcpSocket()

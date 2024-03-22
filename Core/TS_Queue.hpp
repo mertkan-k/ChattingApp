@@ -45,6 +45,10 @@ public:
 		m_realContainer.emplace(std::move(item));
 		cv.notify_one();
 	}
+	void Notify()
+	{
+		cv.notify_all();
+	}
 
 	TS_Queue() {}
 	~TS_Queue() {}
